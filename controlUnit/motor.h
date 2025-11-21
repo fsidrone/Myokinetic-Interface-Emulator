@@ -13,8 +13,8 @@
 
 
 #define RAIO 10 // Raio da polia em mm
-#define SAMPLE_TIME_MS 50 // Tempo de amostragem em ms
-#define SAMPLE_TIME_S 0.05 // Tempo de amostragem em ms
+#define SAMPLE_TIME_MS 25 // Tempo de amostragem em ms
+#define SAMPLE_TIME_S 0.025 // Tempo de amostragem em ms
 
 
 class Motor {
@@ -64,6 +64,7 @@ public:
     void rampMovement();
     void handOpening();
     void handClosing();
+    void moveToZero();
 };
 
 #endif

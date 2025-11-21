@@ -150,8 +150,8 @@ void Motor::freeMovement() {
 }
 
 void Motor::handOpening() {
-    std::cout << "Hand opening movement." << std::endl;
-    frequency = 0;
+    //std::cout << "Hand opening movement." << std::endl;
+    frequency = 1;
     amplitude = 10;
     if(position < amplitude) {
         sineMovement();
@@ -159,18 +159,46 @@ void Motor::handOpening() {
 }
 
 void Motor::handClosing() {
-    std::cout << "Hand closing movement." << std::endl;
-    frequency = 0;
+    //std::cout << "Hand closing movement." << std::endl;
+    frequency = 1;
     amplitude = 10;
     if(position > 0.0f) {
         sineMovement();
     }
 }
 
+void Motor::moveToZero() {
+    const float min_us = 400.0f;
+    const float max_us = 2600.0f;
+    const float period_us = 20000.0f; // 50 Hz servo
+
+    // Posição física zero
+    position = 0.0f;
+    direction = 1;
+    sine_position = 0.0f;
+
+    int angulo = converteDistAngulo(position);
+    float pulse_us = min_us + (angulo / 180.0f) * (max_us - min_us);
+
+        if (id > 4) {
+        pulse_us = max_us - (angulo / 180.0f) * (max_us - min_us);
+    }
+
+    uint32_t duty = (pulse_us / period_us) * 4095.0f;
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, channel, duty);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, channel);
+
+    vTaskDelay(pdMS_TO_TICKS(500)); 
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, channel, 0);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, channel);
+
+}
+
 
 
 uint8_t Motor::converteDistAngulo(float distance) {
-    float angulo = (distance * 180.0f) / (M_PI * RAIO);
+    float offset = 30.0f;
+    float angulo = ((distance * 180.0f) / (M_PI * RAIO)) + offset;
     int anguloInt = static_cast<int>(std::round(angulo));
     if (anguloInt < 0) anguloInt = 0;
     else if (anguloInt > 180) anguloInt = 180;

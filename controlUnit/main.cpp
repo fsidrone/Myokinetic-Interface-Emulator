@@ -23,7 +23,6 @@ SemaphoreHandle_t motoresMutex;
 
 uint8_t control, page, id, frequency, amplitude, waveform, movimentType, start, active;
 std::vector<Motor> motores;
-std::vector<float> stop(8, 0.0f);
 
 
 struct MotorTaskParam {
@@ -93,17 +92,17 @@ void motor_control_task(void* param)
                         counter++;
                         gpio_set_level(TRIGGER_PIN, 0);
                         trigger_control = false;
-                        printf("Counter: %d\n", counter);
+                        //vTaskDelay(pdMS_TO_TICKS(5));
+                        //printf("Counter: %d\n", counter);
                     }
 
                     //trigger
                     if (page == 0) {
                         motores[i].freeMovement();
                     } else if (page == 1) {
-                        vTaskDelay(pdMS_TO_TICKS(5));
+                            vTaskDelay(pdMS_TO_TICKS(15));
                         if (movimentType == 1) {
                             motores[i].handOpening();
-                            printf("Tamanho dos motores %d\n", motores.size());
                         } else if (movimentType == 2) {
                             motores[i].handClosing();
                         } else if (movimentType == 3) {
@@ -134,10 +133,10 @@ void motor_params_task(void* param)
     xSemaphoreTake(motoresMutex, portMAX_DELAY);
     motores.emplace_back(pin, channel, id_motor);
     motores[id_motor - 1].pwmConfig();
+    motores[id_motor - 1].moveToZero();
     xSemaphoreGive(motoresMutex);
-    
-    
 
+    
     while(true) {
         parseReceivedData();
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -150,7 +149,7 @@ void motor_params_task(void* param)
         }
 
 
-            //  printf("Received: ");
+        //  printf("Received: ");
         //  for (int i = 0; i < 6; i++) {
         //      printf("%d ", receivedData[i]);
         //  }
